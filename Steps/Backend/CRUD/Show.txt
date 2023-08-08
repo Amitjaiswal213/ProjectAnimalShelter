@@ -1,0 +1,75 @@
+!!BACKEND!!
+
+Note: ErrorHandler is already coded
+Note: call this if needed
+        const ErrorHandler = require('../utils/errorHandler');
+        const APIFeatures = require('../utils/apiFeatures');
+
+Create Controller Folder
+1. Normal Show
+    //Show
+    // exports.getInjuryDiseases = async (req,res,next) => {
+    // 	const injurydiseases = await InjuryDiseases.find();
+
+    //     if(!injurydiseases) {
+    //       return next(new ErrorHandler('injury and diseases not found',404));
+    //     }
+
+    // 	res.status(200).json({
+    // 		success: true,
+    //         count: injurydiseases.length,
+    //         injurydiseases
+    // 	})
+    // }
+
+
+2. Show With Search
+    //Show with search 
+    // exports.getInjuryDiseases = async (req,res,next) => {
+    // const injurydiseases = await InjuryDiseases.find();
+    // const apiFeatures = new APIFeatures(InjuryDiseases.find(),req.query).search();
+    // const injurydiseases = await apiFeatures.query;
+
+    // res.status(200).json({
+    //     success: true,
+    //     count: injurydiseases.length,
+    //     injurydiseases
+    // })
+
+
+    // }
+
+3. Show with search, filter and pagination
+    //Show with search, filter and pagination
+    exports.getInjuryDiseases = async (req,res,next) => {
+    // const injurydiseases = await InjuryDiseases.find();
+    const resPerPage = 4;
+    const injurydiseasesCount = await InjuryDiseases.countDocuments();
+    const apiFeatures = new APIFeatures(InjuryDiseases.find(),req.query).search().filter();
+    apiFeatures.pagination(resPerPage);
+
+    const injurydiseases = await apiFeatures.query;
+
+        res.status(200).json({
+            success: true,
+        count: injurydiseases.length,
+        injurydiseases
+        })
+
+
+    }
+
+
+
+Create Route Folder
+1.
+    const express = require('express');
+    const router = express.Router();
+
+        const { 
+            newInjuryDiseases, 
+            } = require('../controllers/injurydiseaseController');
+
+        router.route('/injurydiseases/new').post(newInjuryDiseases);
+
+    module.exports = router;

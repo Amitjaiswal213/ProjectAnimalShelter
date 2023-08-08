@@ -1,0 +1,85 @@
+!!BACKEND!!
+
+backend/utils/errorHandler.js
+1. 
+    class ErrorHandler extends Error {
+        constructor(message, statusCode) {
+            super(message);
+            this.statusCode = statusCode
+
+            Error.captureStackTrace(this, this.constructor)
+        }
+    }
+    module.exports = ErrorHandler;
+
+backend/middlewares/errors.js
+1. 
+    const ErrorHandler = require('../utils/errorhandler');
+
+    module.exports = (err, req, res, next) => {
+        err.statusCode = err.statusCode || 500;
+
+        
+        // err.message = err.message || 'Internal server error';
+        if(process.env.NODE_ENV === 'DEVELOPMENT'){
+            res.status(err.statusCode).json({
+                success: false,
+                error: err,
+                errMessage: err.message,
+                stack: err.stack
+            })
+        }
+
+
+        if(process.env.NODE_ENV === 'PRODUCTION'){
+            let error = {...err}
+            error.message = err.message;
+
+            // Wrong Mongoose Object ID Error
+            if (err.name === 'CastError') {
+                const message = `Resource not found. Invalid: ${err.path}`
+                error = new ErrorHandler(message, 400)
+            }
+
+            // Handling Mongoose Validation Error
+            if (err.name === 'ValidationError') {
+                const message = Object.values(err.errors).map(value => value.message);
+                error = new ErrorHandler(message, 400)
+            }
+
+            // Handling Mongoose duplicate key errors
+            if (err.code === 11000) {
+                const message = `Duplicate ${Object.keys(err.keyValue)} entered`
+                error = new ErrorHandler(message, 400)
+            }
+            
+            res.status(error.statusCode).json({
+                success: false,
+                message: error.message || 'Internal server error'			
+            })
+        }
+
+        
+    }
+
+backend/app.js
+1. Added Codes 
+
+    const errorMiddleware = require('./middlewares/errors');
+    app.use(errorMiddleware);
+
+2. Complete Code
+
+    const express = require('express');``
+    const app = express(); 
+    const errorMiddleware = require('./middlewares/errors');
+
+    app.use(express.json());
+
+    const injurydiseases = require('./routes/injurydiseasesRoute');
+
+    app.use('/api/v1', injurydiseases);
+    app.use(errorMiddleware);
+
+
+    module.exports = app

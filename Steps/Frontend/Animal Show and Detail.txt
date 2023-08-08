@@ -1,0 +1,362 @@
+ACTIONS -> STORE.JS -> COMPONENTS
+
+store.js -> index.js -> reducer.js -> constants.js -> actions.js -> components ex. animals -> home.js
+
+createStore - Will create store object,
+createReducer is a function that takes all your cases and their individual 
+reducers and creates the main reducer function that you want.
+
+combineReducers -
+The combineReducers helper function turns an object whose values are 
+different reducing functions into a single reducing function you can pass to createStore.
+
+applyMiddleware - 
+This is a function packaged with redux that accepts one or more middlewares and returns a function. 
+It is a store enhancer usually place after every other store enhancer you may use.
+
+redux-thunk - 
+It allows writing functions with logic inside that 
+can interact with a Redux store's dispatch and getState methods.
+----------------------------------------------------------------------------------------------------
+
+/backend/controllers/animalControllers.js
+1.
+    //get all
+    exports.getAnimals = async (req,res,next) => {
+        const resPerPage = 4;
+        const apiFeatures = new APIFeatures(Animals.find(),req.query).search().filter();
+        apiFeatures.pagination(resPerPage);
+    
+        const animals = await apiFeatures.query;
+    
+        res.status(200).json({
+            success: true,
+            count: animals.length,
+            animals
+        })
+
+        if(!animals) {
+            return next(new ErrorHandler('my error',400))    
+        }
+    
+    
+    }
+
+/store.js
+1.
+
+import { createStore, combineReducers, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+import { composeWithDevTools } from 'redux-devtools-extension'
+
+
+import { 
+        animalsReducer, 
+        animalsDetailsReducer,
+   } from './reducers/animalsReducer'
+   
+
+//one object that contains all of the reducers
+const reducer = combineReducers({
+	animals: animalsReducer,
+    animalsDetails: animalsDetailsReducer,
+})
+
+
+//Empty Object
+let initialState = {
+
+
+}
+
+//middleware
+const middlware = [thunk]
+const store = createStore(reducer, initialState, composeWithDevTools(applyMiddleware(...middlware)))
+
+export default store;
+
+
+/src/index.js
+1.
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import App from './App';
+import store from './store'
+
+import { Provider } from 'react-redux'
+
+import { positions, transitions, Provider as AlertProvider } from 'react-alert'
+import AlertTemplate from 'react-alert-template-basic'
+
+const options = {
+	timeout:5000,
+	position: positions.BOTTOM_CENTER,
+	transition: transitions.SCALE
+}
+
+ReactDOM.render(
+    <Provider store={store} >
+      <AlertProvider template = {AlertTemplate} {...options}>
+        <App />
+      </AlertProvider>
+    </Provider>,
+    document.getElementById('root')
+);
+
+
+
+src/reducers/animalsReducer.js
+1.
+
+    import { 
+        //for show all
+        ALL_ANIMALS_REQUEST,
+        ALL_ANIMALS_SUCCESS, 
+        ALL_ANIMALS_FAIL,
+        
+        //for click detail
+        ANIMALS_DETAILS_REQUEST,
+        ANIMALS_DETAILS_SUCCESS,
+        ANIMALS_DETAILS_FAIL,
+        CLEAR_ERRORS,
+
+    } from '../constants/animalsConstant'
+
+    //Reducer for show all in front page
+    export const animalsReducer = (state = { animals: [] }, action) => {
+        switch(action.type) {
+
+            case ALL_ANIMALS_REQUEST:
+                return {
+                    loading: true,
+                    animals: []
+                }
+
+            case ALL_ANIMALS_SUCCESS:
+                return {
+                    loading:false,
+                    animals: action.payload.animals,
+                    animalsCount: action.payload.animalsCount,
+                    resPerPage: action.payload.resPerPage,
+                    filteredAnimalsCount: action.payload.filteredAnimalsCount
+                }
+
+            case ALL_ANIMALS_FAIL:
+                return {
+                    loading:false,
+                    error: action.payload
+                }
+
+            case CLEAR_ERRORS:
+                return {
+                    ...state,
+                    error: null
+                }
+
+            default:
+                return state;
+        }
+    }
+
+    //for click detail of animals
+    export const animalsDetailsReducer = (state = { animals: {} }, action) => {
+        switch (action.type) {
+
+            case ANIMALS_DETAILS_REQUEST:
+                return {
+                    ...state,
+                    loading: true
+                }
+
+            case ANIMALS_DETAILS_SUCCESS:
+                return {
+                    loading: false,
+                    animals: action.payload
+                }
+
+            case ANIMALS_DETAILS_FAIL:
+                return {
+                    ...state,
+                    error: action.payload
+                }
+
+            case CLEAR_ERRORS:
+                return {
+                    ...state,
+                    error: null
+                }
+
+            default:
+                return state
+        }
+    }
+
+/src/constants/animalConstants.js
+1.
+    //Front
+    export const ALL_ANIMALS_REQUEST = 'ALL_ANIMALS_REQUEST'
+    export const ALL_ANIMALS_SUCCESS = 'ALL_ANIMALS_SUCCESS'
+    export const ALL_ANIMALS_FAIL = 'ALL_ANIMALS_FAIL'
+
+
+    //Animal Detail
+    export const ANIMALS_DETAILS_REQUEST = 'ANIMALS_DETAILS_REQUEST' 
+    export const ANIMALS_DETAILS_SUCCESS = 'ANIMALS_DETAILS_SUCCESS'
+    export const ANIMALS_DETAILS_FAIL = 'ANIMALS_DETAILS_FAIL'
+
+
+    export const CLEAR_ERRORS = 'CLEAR_ERRORS'
+
+
+/src/actions/animalActions.js
+1.
+    import axios from 'axios';
+
+    import { 
+        ALL_ANIMALS_REQUEST,
+        ALL_ANIMALS_SUCCESS, 
+        ALL_ANIMALS_FAIL,
+        ANIMALS_DETAILS_REQUEST,
+        ANIMALS_DETAILS_SUCCESS,
+        ANIMALS_DETAILS_FAIL,
+        CLEAR_ERRORS
+    } from '../constants/animalsConstant'
+
+
+    //Animal Show all in frontpage
+    export const getAnimals = () => async (dispatch) => {
+        
+        try {
+
+            dispatch({
+                type: ALL_ANIMALS_REQUEST
+            })
+
+            const { data } = await axios.get('/api/v1/animals')
+
+            dispatch({
+                type: ALL_ANIMALS_SUCCESS,
+                payload: data
+            })
+
+        } catch(error) {
+
+            dispatch({
+                type: ALL_ANIMALS_FAIL,
+                payload: error.response.data.message
+            })
+        }
+    }
+
+    //Animal Click Detail
+    export const getAnimalsDetails = (id) => async (dispatch) => {
+        try {
+
+            dispatch({ type: ANIMALS_DETAILS_REQUEST })
+            const { data } = await axios.get(`/api/v1/animals/${id}`)
+
+            dispatch({
+                type: ANIMALS_DETAILS_SUCCESS,
+                payload: data.animals
+
+            })
+        } catch (error) {
+            dispatch({
+                type: ANIMALS_DETAILS_FAIL,
+                payload: error.response.data.message
+            })
+        }
+    }
+
+    //error
+    export const clearErrors = () => async (dispatch) =>{
+        dispatch({
+            type: CLEAR_ERRORS
+
+        })
+    }
+
+
+/src/components/animals/Animal.js
+1. For Show all Animals
+    import React from 'react'
+    import { Link } from 'react-router-dom'
+
+    const Animal = ({animal}) => {
+        return ( 
+            <div className="col-sm-12 col-md-6 col-lg-3 my-3">
+                <div className="card p-3 rounded">
+
+                    <img
+                    className="card-img-top mx-auto"
+                    src={animal.images[0].url} alt=""
+                    />
+
+                    <div className="card-body d-flex flex-column">
+                    <h5 className="card-title">
+                        <a href="">{animal.name}</a>
+                    </h5>
+
+
+                    {/* <a href="#" id="view_btn" className="btn btn-block">View Details</a> */}
+                    <Link to={`/animals/${animal._id}`} id="view_btn" className="btn btn-block">View Details</Link>
+                    </div>
+
+                </div>
+            </div>
+        )
+    }
+    export default Animal
+
+/src/components/animals/AnimalDetails.js
+1.
+    import React, { Fragment,  useEffect } from 'react'
+    import { Carousel } from 'react-bootstrap'
+    import Loader from '../layout/Loader'
+    import MetaData from '../layout/MetaData'
+    import { useAlert } from 'react-alert'
+    import { useDispatch, useSelector } from 'react-redux'
+    import { getAnimalsDetails, clearErrors } from '../../actions/animalsAction'
+    import { useParams } from 'react-router-dom';
+    
+
+    const AnimalDetails = ({ match }) => { 
+        const dispatch = useDispatch();
+        const alert = useAlert();
+        let { id } = useParams();
+
+        const { loading, error, animals } = useSelector(state => state.animalsDetails);
+        useEffect(() => {
+            dispatch(getAnimalsDetails(id))
+            if (error) {
+                alert.error(error);
+                dispatch(clearErrors())
+            }
+        }, [dispatch, alert, error, id]);
+        
+        return (
+            <Fragment>
+                {loading ? <Loader /> : (
+                    <Fragment>
+                    <MetaData title={animals.name} />
+
+                    <div className="row d-flex justify-content-around">
+                            <div className="col-12 col-lg-5 img-fluid" id="animals_image">
+                                <Carousel pause='hover'>
+                                    {animals.images && animals.images.map(image => (
+                                        <Carousel.Item key={image.public_id}>
+                                            <img className="d-block w-100" src={image.url} alt={animals.name} />
+                                        </Carousel.Item>
+                                    ))}
+                                </Carousel>
+                            </div>
+                        </div>
+                    </Fragment>
+                )}
+            </Fragment>
+        )
+    }
+    export default AnimalDetails
+
+

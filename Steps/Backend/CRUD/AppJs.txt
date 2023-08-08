@@ -1,0 +1,16 @@
+!!BACKEND!!
+
+app.js
+1.
+    const express = require('express');``
+    const app = express(); 
+
+    app.use(express.json());
+
+
+    const injurydiseases = require('./routes/injurydiseasesRoute');
+
+    app.use('/api/v1', injurydiseases);
+
+
+    module.exports = app

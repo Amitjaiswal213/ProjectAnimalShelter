@@ -1,0 +1,36 @@
+!!BACKEND!!
+
+Note: call this if needed
+    const ErrorHandler = require('../utils/errorHandler');
+    const APIFeatures = require('../utils/apiFeatures');
+
+Create Controller Folder
+1.
+    const InjuryDiseases = require('../models/injurydiseasesModel');
+
+        //create
+        exports.newInjuryDiseases = async (req,res,next) => {
+            const { name } = req.body;
+            const injurydiseases = await InjuryDiseases.create({
+                name
+            });
+
+            res.status(200).json({
+                success: true,
+                injurydiseases
+            })
+        }
+
+
+Create Route Folder
+1.
+    const express = require('express');
+    const router = express.Router();
+
+        const { 
+            newInjuryDiseases, 
+            } = require('../controllers/injurydiseaseController');
+
+        router.route('/injurydiseases/new').post(newInjuryDiseases);
+
+    module.exports = router;

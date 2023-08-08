@@ -1,0 +1,72 @@
+Animal Shelter MERN App
+
+mp1 
+    <!-- animal CRUD API functions and front end components. 
+    animals should be categorized into different types. 
+    upload photos of animals via cloudinary or local drive. 20pts  -->
+
+
+mp2 
+    <!-- shelter personnel CRUD API functions and front end components.-->
+    <!-- personnel can be employees, veterinarians or volunteers.  -->
+    <!-- upload photos of personnel via cloudinary or local drive. 20pts  -->
+
+
+mp3 
+    <!-- common animal diseases and injuries CRUD API functions and front end components.  20pts -->
+
+
+mp4  
+    <!-- adopter registration CRUD API functions and front end components.  -->
+    <!-- personnel can only delete or make inactive the adopter.  -->
+    <!-- adopters need not be approved by an  employee.  -->
+    <!-- adopters can update their profile  20pts -->
+
+
+ 
+ 
+mp5 
+    create a dashboard that will generate react charts of the following: 
+    total number of animals adopted monthly or yearly (use datepickers to choose a range of dates and the chart will automatically adjust ) 
+    total number of animals rescued monthly or yearly (use datepickers to choose a range of dates and the chart will automatically adjust ) 
+    *you can use MDB REact datatables
+
+
+
+UNIT 1 
+    <!-- 20pts apply authentication for CRUD operations 15pts 
+    use facebook or google login for authentication 20pts -->
+
+
+
+unit 2 20pts 
+ create the animal adoption process API functions and front end components. 
+ no admin approval required. 
+ Only registered adopters are allowed to adopt 15pts
+
+ Adoption should be approved by any shelter personnel 20pts
+
+
+<!-- quiz 1 15pts
+ apply react pagination 10pts  -->
+ apply any infinite scroll library 15pts
+
+
+<!-- quiz 2 15pts
+ create a search function for animals 10pts -->
+ <!-- create a search and filter function. filter animals by their breed, age, sex and category. 15pts. -->
+
+
+quiz 3 
+ <!-- users can comment on the adoptable animal profile 10pts -->
+ users can comment on the adoptable animal profile and apply a profanity filter library 15pts
+
+
+term test 20pts
+<!-- 1. use React state via props/hooks 15pts
+2. use Redux for state management 20pts  -->
+Deploy the App on Mongodb Atlas and Heroku
+Collaborate but do not copy whole project code.
+Requirements may be updated.
+Post questions on the comment box
+Goodluck!

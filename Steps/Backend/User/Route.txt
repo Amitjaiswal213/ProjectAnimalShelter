@@ -1,0 +1,43 @@
+!!BACKEND!!
+
+/routes/auth.js
+1.
+    const express = require('express');
+    const router = express.Router();
+
+    const { registerUser,
+            loginUser,
+            logout
+            // forgotPassword,
+            // resetPassword
+        } = require('../controllers/authController');
+
+
+
+    router.route('/register').post(registerUser);
+    router.route('/login').post(loginUser);
+
+    // router.route('/password/forgot').post(forgotPassword);
+    // router.route('/password/reset/:token').put(resetPassword);
+
+    router.route('/logout').get(logout);
+
+module.exports = router;
+
+
+/routes/injurydiseasesRoute.js
+1. Declare isAuthenticatedUser and authorizeRoles
+
+    const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
+
+2. Protect
+
+    router.route('/injurydiseases').get(isAuthenticatedUser, authorizeRoles('admin'), getInjuryDiseases);
+
+    Sample:
+    router.route('/product/new').post(isAuthenticatedUser,newProduct);
+    router.route('/product/:id').get(getSingleProduct);
+    
+    router.route('/admin/product/:id')
+    .put(isAuthenticatedUser, authorizeRoles('admin','encoder'),updateProduct)
+    .delete(isAuthenticatedUser, authorizeRoles('admin','encoder'), deleteProduct);

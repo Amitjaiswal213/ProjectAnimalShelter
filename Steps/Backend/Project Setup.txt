@@ -1,0 +1,79 @@
+To run backend: npm run dev
+
+Root directory
+1. npm init -y
+2. npm i dotenv express mongoose
+3. npm i --save-dev nodemon
+4. npm i bcryptjs cookie-parser jsonwebtoken validator
+5. npm i --save nodemailer
+
+
+Frontend Directory
+
+1. npx create-react-app .
+2. Downgrade react 18 to 17
+3. npm i axios react-alert react-alert-template-basic react-bootstrap react-helmet react-redux redux redux-thunk redux-devtools-extension react-router-dom
+
+package.json 
+1.  
+    "dev": "SET NODE_ENV=DEVELOPMENT& nodemon backend/server",
+    "prod": "SET NODE_ENV=PRODUCTION& nodemon backend/server",
+
+
+backend/config/config.env
+1.
+    PORT = 4000
+    NODE_ENV = DEVELOPMENT
+    DB_LOCAL_URI = mongodb+srv://admin:LiqaG0vvrW4lGyWH@cluster0.0egua.mongodb.net/animalshelter?retryWrites=true&w=majority
+
+
+backend/config/database.js
+1.
+    const mongoose = require('mongoose');
+
+    const connectDatabase = () => {
+        mongoose.connect(process.env.DB_LOCAL_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            
+        }).then(con => {
+            console.log(`MongoDB Database connected with HOST: ${con.connection.host}`)
+        })
+    }
+
+    module.exports = connectDatabase
+
+
+backend/app.js
+1.
+    const express = require('express');
+    const app = express(); 
+    
+    app.use(express.json());
+
+    module.exports = app
+
+
+backend/server.js
+1.
+    const app = require('./app'); 
+    const connectDatabase = require('./config/database');
+    const mongoose = require('mongoose');
+    
+
+    const dotenv = require('dotenv');
+
+    //check connection
+    dotenv.config({path: 'backend/config/config.env'});
+
+
+    //call database
+    connectDatabase(); 
+
+    app.listen(process.env.PORT, () => {
+        console.log(`server started on port:' ${process.env.PORT} in ${process.env.NODE_ENV} mode`);
+    });
+
+
+
+

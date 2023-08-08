@@ -1,0 +1,44 @@
+!!BACKEND!!
+
+Note: ErrorHandler is already coded
+Note: Call this if needed
+        const ErrorHandler = require('../utils/errorHandler');
+        const APIFeatures = require('../utils/apiFeatures');
+
+
+Create Controller Folder
+1.
+    //Delete
+    exports.deleteInjuryDiseases = async(req,res,next) =>{
+        const injurydiseases = await InjuryDiseases.findById(req.params.id);
+
+        if (!injurydiseases) {
+        return next(new ErrorHandler('No injury and diseases found with this ID', 404))
+        }
+
+        //errorhandling without ErrorHandler remove if not needed
+        //if(!injurydiseases) {
+        //  return res.status(404).json({
+        //    success: false,
+        //    message: 'injurydiseases not found'
+        //    })
+        //}
+
+        await injurydiseases.remove();
+
+        res.status(200).json({
+        success: true,
+        message: 'injury diseases deleted'
+        })
+    }
+
+
+Create Route Folder
+1.
+    const { 
+        deleteInjuryDiseases, 
+    } = require('../controllers/injurydiseaseController');
+
+    router.route('/admin/injurydiseases/:id').put(updateSingleInjuryDiseases).delete(deleteInjuryDiseases);
+
+

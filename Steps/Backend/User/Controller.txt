@@ -1,0 +1,89 @@
+!!BACKEND!!
+
+After the Installation of tokens in config.env
+1
+    JWT_SECRET = THEQUICKBROWNFOX
+    JWT_EXPIRES_TIME = 7d
+    COOKIE_EXPIRES_TIME = 7
+
+
+controllers/authControllers
+1.
+    const User = require('../models/userModel');
+    const ErrorHandler = require('../utils/errorHandler');
+    const sendToken = require('../utils/jwtToken');
+    // const sendEmail = require('../utils/sendEmail');
+    const crypto = require('crypto');
+
+    //register a User
+    exports.registerUser = async (req, res, next) => {
+        const { name, email, password, role } = req.body;
+        const user = await User.create({
+            name,
+            email,
+            password,
+            role,
+            avatar: {
+                public_id: 'samples/cld-sample',
+                url: 'https://res.cloudinary.com/chrsxt/image/upload/v1649799726/cld-sample.jpg'
+                
+            }
+        })
+        //    //test token
+        //     const token = user.getJwtToken();
+        
+        //     res.status(201).json({
+        //         success:true,
+        //         user,
+        //         token
+        //     })
+        sendToken(user, 200, res)
+    };
+
+    //Login User
+    exports.loginUser = async (req, res, next) => {
+        const { email, password } = req.body;
+
+        // Checks if email and password is entered by user
+        if (!email || !password) {
+            return next(new ErrorHandler('Please enter email & password', 400))
+        }
+
+        // Finding user in database
+        const user = await User.findOne({ email }).select('+password')
+
+        if (!user) {
+            return next(new ErrorHandler('Invalid Email or Password', 401));
+        }
+
+        // Checks if password is correct or not
+        const isPasswordMatched = await user.comparePassword(password);
+
+        if (!isPasswordMatched) {
+            return next(new ErrorHandler('Invalid Email or Password', 401));
+        }
+
+
+        // const token = user.getJwtToken();
+        // res.status(201).json({
+        //     success:true,
+        //     user,
+        //     token
+        // })
+    
+        sendToken(user, 200, res)
+    }
+
+
+    //Logout User
+    exports.logout = async (req, res, next) => {
+        res.cookie('token', null, {
+            expires: new Date(Date.now()),
+            httpOnly: true
+        })
+
+        res.status(200).json({
+            success: true,
+            message: 'Logged out'
+        })
+    }

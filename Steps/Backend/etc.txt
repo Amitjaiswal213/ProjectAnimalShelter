@@ -1,0 +1,6 @@
+1. Data folder in backend is like a seeder
+2. Models = Schema
+
+
+
+
